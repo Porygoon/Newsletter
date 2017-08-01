@@ -17,7 +17,7 @@ class DefaultController extends Controller
     /**
      * @Route("/", name="homepage")
      */
-    public function indexAction(Request $request)
+    public function indexAction(\Swift_Mailer, Request $request)
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -50,10 +50,19 @@ class DefaultController extends Controller
             if(!$NewsLetters->getNom()) {
                 $NewsLetters->setNom("Anonyme");
             }
-                       
+
+            $message = (new \Swift_Message('Confirmation d\'inscription à la newsletter'))
+                ->setFrom('ez@zezezezeeze.fr')
+                ->setTo('kurokncjb@gmail.com')
+                ->setBody(
+                    $this->renderView('emails/confirmationEmalil.html.twig'), 'text/html'
+                );
+            $this->get('mailer')->send($message);
+
 
             $em->persist($NewsLetters);
             $em->flush();
+
         }
 
 
