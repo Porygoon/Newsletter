@@ -17,7 +17,7 @@ class DefaultController extends Controller
     /**
      * @Route("/", name="homepage")
      */
-    public function indexAction(\Swift_Mailer, Request $request)
+    public function indexAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -51,24 +51,48 @@ class DefaultController extends Controller
                 $NewsLetters->setNom("Anonyme");
             }
 
-            $message = (new \Swift_Message('Confirmation d\'inscription à la newsletter'))
-                ->setFrom('ez@zezezezeeze.fr')
-                ->setTo('kurokncjb@gmail.com')
-                ->setBody(
-                    $this->renderView('emails/confirmationEmalil.html.twig'), 'text/html'
-                );
-            $this->get('mailer')->send($message);
-
-
             $em->persist($NewsLetters);
             $em->flush();
 
+            $nom = $NewsLetters->getNom();
+
+
+            if($NewsLetters->getNewsStylo() == 1) {
+                $newsStylo = "des stylos";
+            } else {
+                $newsStylo = "";
+            }
+            if($NewsLetters->getNewsCrayon() == 1) {
+                $newsCrayon = "des crayons";
+            } else {
+                $newsCrayon = "";
+            }
+            if($NewsLetters->getNewsFeutre() == 1) {
+                $newsFeutre = "des feutres";
+            } else {
+                $newsFeutre = "";
+            }
+            $newsWebsite = "du site web";
+
+            $message = (new \Swift_Message('Confirmation d\'inscription à la newsletter'))
+                ->setFrom('ez@zezezezeeze.fr')
+                ->setTo($NewsLetters->getEmail())
+                ->setBody(
+                    $this->renderView('emails/confirmationEmail.html.twig',
+                    array(
+                        'nom' => $nom,
+                        'siteWeb' => $newsWebsite,
+                        'stylo' => $newsStylo,
+                        'crayon' => $newsCrayon,
+                        'feutre' => $newsFeutre)
+                ), // Ferme le renderView
+                    'text/html'
+                ); // Ferme le setBody
+            $this->get('mailer')->send($message);
+
+
+
         }
-
-
-//        $em->persist($NewsLetters);
-//        $em->flush();
-
 
         return $this->render('default/index.html.twig', array(
         'form' => $form->createView()
